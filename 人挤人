@@ -1,0 +1,53 @@
+local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/kismile36/ji1ami/refs/heads/main/UI1"))()
+local win = ui:new("人挤人中心")
+local UITab1 = win:Tab("公告",'7734068321')
+local UITab2 = win:Tab("活动",'7734068321')
+local about = UITab1:section("公告",true)
+
+about:Label("kismile制作")
+about:Label("作者qq 822588076")
+
+local fruitSection = UITab2:section("活动", true)
+
+if not _G.Settings then
+    _G.Settings = {
+        Fruit = {
+            ["Auto Buy Candy Fruit"] = false
+        }
+    }
+end
+
+if not getgenv().SaveSetting then
+    getgenv().SaveSetting = function()
+    end
+end
+
+local AutoCandyFruitToggle = fruitSection:Toggle("自动用糖果抽果实", "AutoCandyFruitToggle", _G.Settings.Fruit["Auto Buy Candy Fruit"] or false, function(state)
+    _G.Settings.Fruit["Auto Buy Candy Fruit"] = state;
+    getgenv().SaveSetting()
+end);
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        pcall(function()
+            if _G.Settings.Fruit["Auto Buy Candy Fruit"] then
+                local CommF_Remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_", 5)
+                if CommF_Remote and math.random(1, 5) == 1 then
+                    local checkArgs = {"Cousin", "CheckCanBuyType", "F2PXmasWeek2Gacha25"}
+                    CommF_Remote:InvokeServer(unpack(checkArgs))
+                end
+
+                if CommF_Remote then
+                    local drawArgs = {"Cousin", "F2PXmasWeek2Gacha25"}
+                    CommF_Remote:InvokeServer(unpack(drawArgs))
+                end
+
+                local GetIsComingSoon_Remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetIsComingSoon", 5)
+                if GetIsComingSoon_Remote and math.random(1, 10) == 1 then
+                    GetIsComingSoon_Remote:InvokeServer()
+                end
+            end
+        end)
+    end
+end);
